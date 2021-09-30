@@ -3,7 +3,6 @@ import { Card, Grid } from '@material-ui/core'
 import InvoiceViewer from './InvoiceViewer'
 import InvoiceEditor from './InvoiceEditor'
 import { useParams } from 'react-router-dom'
-import MarkerMap from './MarkerMap'
 
 const InvoiceDetails = () => {
     const [showInvoiceEditor, setShowInvoiceEditor] = useState(false)
