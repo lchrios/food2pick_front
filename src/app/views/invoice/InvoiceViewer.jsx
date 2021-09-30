@@ -149,16 +149,16 @@ const InvoiceViewer = ({ toggleInvoiceEditor }) => {
                                 <TableCell className="px-0">
                                     Item Name
                                 </TableCell>
-                                <TableCell className="px-0">
-                                    Unit Price
-                                </TableCell>
                                 <TableCell className="px-0">Unit</TableCell>
-                                <TableCell className="px-0">Cost</TableCell>
+                                <TableCell className="px-0">
+                                    Weight
+                                </TableCell>
+                                {/* <TableCell className="px-0">Cost</TableCell> */}
                             </TableRow>
                         </TableHead>
                         <TableBody>
                             {invoiceItemList.map((item, index) => {
-                                subTotalCost += item.unit * item.price
+                                subTotalCost += item.weight;
                                 return (
                                     <TableRow key={index}>
                                         <TableCell
@@ -173,18 +173,18 @@ const InvoiceViewer = ({ toggleInvoiceEditor }) => {
                                         >
                                             {item.name}
                                         </TableCell>
+                                        <TableCell className="pl-0 capitalize">
+                                            {item.unit}
+                                        </TableCell>
                                         <TableCell
                                             className="pl-0 capitalize"
                                             align="left"
                                         >
-                                            {item.price}
+                                            {item.weight} kg
                                         </TableCell>
-                                        <TableCell className="pl-0 capitalize">
-                                            {item.unit}
-                                        </TableCell>
-                                        <TableCell className="pl-0">
+                                        {/* <TableCell className="pl-0">
                                             {item.unit * item.price}
-                                        </TableCell>
+                                        </TableCell> */}
                                     </TableRow>
                                 )
                             })}

@@ -7,11 +7,12 @@ import {
     Icon,
     IconButton,
 } from '@material-ui/core'
-import React, { Fragment } from 'react'
-import DummyChart from './DummyChart'
+import React, { Fragment, useEffect } from 'react'
 import ProfileBarChart from './ProfileBarChart'
 import { makeStyles, useTheme } from '@material-ui/core/styles'
 import clsx from 'clsx'
+import useAuth from 'app/hooks/useAuth'
+import { getDonations } from 'app/services/queries';
 
 const usestyles = makeStyles(({ palette, ...theme }) => ({
     profileContent: {
@@ -58,11 +59,19 @@ const usestyles = makeStyles(({ palette, ...theme }) => ({
         borderRadius: 8,
         backgroundColor: 'rgba(var(--body), 0.1)',
     },
+    largeIcon: {
+        fontSize: "3em"
+    }
 }))
 
 const UserProfileContent = ({ toggleSidenav }) => {
     const classes = usestyles()
     const theme = useTheme()
+    let { user } = useAuth();
+
+    useEffect(() => {
+        getDonations(user.uid)
+    }, [])
 
     return (
         <Fragment>
@@ -93,7 +102,7 @@ const UserProfileContent = ({ toggleSidenav }) => {
                                         </h4>
                                     </div>
                                     <div className="w-56 h-36">
-                                        <DummyChart height="40px" />
+                                        <Icon className={classes.largeIcon}>{project.icon}</Icon>
                                     </div>
                                 </Card>
                             </Grid>
@@ -105,7 +114,7 @@ const UserProfileContent = ({ toggleSidenav }) => {
                     <Grid item lg={8} md={8} sm={12} xs={12}>
                         <Card className="pb-4">
                             <h4 className="font-medium text-muted px-4 pt-4 pb-0">
-                                Data Use
+                                Current donation
                             </h4>
                             <ProfileBarChart
                                 height="260px"
@@ -114,7 +123,7 @@ const UserProfileContent = ({ toggleSidenav }) => {
                             <div className="pt-4 flex items-center justify-around">
                                 <div>
                                     <h1 className="font-normal m-0 mb-1">
-                                        140
+                                        {"70 kg"}
                                     </h1>
                                     <span className="font-normal text-muted uppercase">
                                         avg yearly
@@ -305,7 +314,7 @@ const UserProfileContent = ({ toggleSidenav }) => {
                         </Card>
                     </Grid>
 
-                    <Grid item lg={4} md={4} sm={12} xs={12}>
+                    {/* <Grid item lg={4} md={4} sm={12} xs={12}>
                         <Card>
                             {paymentList.map((method, index) => (
                                 <Fragment key={index}>
@@ -334,7 +343,7 @@ const UserProfileContent = ({ toggleSidenav }) => {
                                 </Fragment>
                             ))}
                         </Card>
-                    </Grid>
+                    </Grid> */}
                 </Grid>
                 <div className="py-2"></div>
             </div>
@@ -342,18 +351,22 @@ const UserProfileContent = ({ toggleSidenav }) => {
     )
 }
 
+const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', };
 const projectSummery = [
     {
-        title: 'Project Created',
-        amount: 11,
+        title: 'Donations made',
+        amount: 0,
+        icon: 'shopping_basket'
     },
     {
-        title: 'Project Completed',
-        amount: 15,
+        title: 'KG of food',
+        amount: "15 Kg",
+        icon: 'local_dining'
     },
     {
-        title: 'Project Published',
-        amount: 25,
+        title: 'Last donation',
+        amount: new Date(new Date().getTime() - 1*17*60*60*1000).toLocaleTimeString("es-MX", options),
+        icon: 'access_time'
     },
 ]
 

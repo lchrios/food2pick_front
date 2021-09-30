@@ -3,7 +3,8 @@ import { Avatar, Button, Card, Grid, Icon } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import clsx from 'clsx'
 import useAuth from 'app/hooks/useAuth'
-
+import { Link } from 'react-router-dom'
+import history from '../../../history';
 const usestyles = makeStyles(({ palette, ...theme }) => ({
     sidenav: {
         marginTop: -345,
@@ -17,23 +18,24 @@ const usestyles = makeStyles(({ palette, ...theme }) => ({
 const UserProfileSidenav = () => {
     const classes = usestyles()
     const { user } = useAuth()
+    console.log(user)
     return (
         <div className={clsx('flex-column items-center', classes.sidenav)}>
             <Avatar
                 className="h-84 w-84 mb-5"
-                src="/assets/images/face-7.jpg"
+                src={user.avatar !== undefined ? user.avatar : "/assets/images/face-7.jpg"}
             />
             <p className="text-white">{user.name}</p>
-            <div className="py-3" />
+            <div className="py-1" />
             <div className="flex flex-wrap w-full px-12 mb-11">
-                <div className="flex-grow">
-                    <p className="uppercase text-light-white mb-1">balance</p>
-                    <h4 className="font-medium text-white">$ 20,495</h4>
+                <div className="flex-grow text-center">
+                    <p className="uppercase text-light-white mb-1">Selected address:</p>
+                    <h5 className="font-medium text-white">{ user.address !== undefined ? user.address : "Av. Allende 586, Col. Heroes, 68753, Birnin Zana, Wakanda, México"}</h5>
                 </div>
-                <div>
+                {/* <div>
                     <p className="uppercase text-light-white mb-1">points</p>
                     <h4 className="font-medium text-white">PT 3,000</h4>
-                </div>
+                </div> */}
                 <div />
             </div>
             <div className="px-8 pt-2 bg-default">
@@ -51,9 +53,11 @@ const UserProfileSidenav = () => {
                         <Grid item key={ind}>
                             <Card className="w-104 h-104 flex items-center justify-center">
                                 <div className="text-muted text-center">
+                                    <Link to={item.path}> 
                                     <Icon>{item.icon}</Icon>
                                     <br />
                                     <span className="pt-4">{item.title}</span>
+                                    </Link>
                                 </div>
                             </Card>
                         </Grid>
@@ -76,16 +80,18 @@ const UserProfileSidenav = () => {
 
 const shortcutList = [
     {
-        title: 'stars',
+        title: 'Reviews',
         icon: 'star_outline',
     },
     {
-        title: 'events',
+        title: 'Notifications',
         icon: 'email',
+        path:  'invoice/list'
     },
     {
-        title: 'Photo',
+        title: 'Invoices',
         icon: 'collections',
+        path:  'invoice/list'
     },
     {
         title: 'settings',
@@ -94,6 +100,7 @@ const shortcutList = [
     {
         title: 'contacts',
         icon: 'group',
+        path:  'invoice/list'
     },
 ]
 

@@ -11,6 +11,7 @@ import sessionRoutes from './views/sessions/SessionRoutes'
 import AuthGuard from './auth/AuthGuard'
 import { AuthProvider } from 'app/contexts/JWTAuthContext'
 import { SettingsProvider } from 'app/contexts/SettingsContext'
+import ScrollToTop from './utils/ScrollToTop'
 
 const App = () => {
     return (
@@ -22,6 +23,7 @@ const App = () => {
                         <Router history={history}>
                             <AuthProvider>
                                 <MatxSuspense>
+                                    <ScrollToTop />
                                     <Switch>
                                         {/* AUTHENTICATION PAGES (SIGNIN, SIGNUP ETC.) */}
                                         {sessionRoutes.map((item, i) => (

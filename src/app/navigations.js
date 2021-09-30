@@ -22,7 +22,7 @@ export const navigations = [
             },
         ],
     },
-    {
+    /*{
         name: 'Session/Auth',
         icon: 'security',
         children: [
@@ -171,5 +171,5 @@ export const navigations = [
                 iconText: 'S',
             },
         ],
-    },
+    },*/
 ]
