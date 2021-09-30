@@ -92,28 +92,47 @@ const UserProfileContent = ({ toggleSidenav }) => {
     });
     let { user } = useAuth();
 
-    const [isAlive, setIsAlive] = useState(true)
     
 
     useEffect(() => {
         getDonationsByDonator(user.id)
         .then(donations => {
             console.log(donations.result)
-            //setDonations(donations)
+            setDonations(donations.result)
         })
     }, [])
 
     useEffect(() => {
         if (donations.length > 0) {
             // * sort them by time
-            donations.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+            donations.sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime())
 
             // * calculate summaries
+            let kg = 0;
             donations.forEach((donation) => {
+                kg += donation.id
 
+                
+            })
+            setSummary({
+                "donations": {
+                    title: 'Donations made',
+                    amount: donations.length,
+                    icon: 'shopping_basket',
+                },
+                "food": {
+                    title: 'KG of food',
+                    amount: `${kg} Kg`,
+                    icon: 'local_dining'
+                },
+                "last": {
+                    title: 'Last donation',
+                    amount: donations.length > 0 && donations[donations.lastIndex]?.fecha !== undefined ? donations[donations.lastIndex]?.fecha : "None",
+                    icon: 'access_time'
+                }
             })
         }
-    }, donations)
+    }, [donations])
 
     return (
         <Fragment>
@@ -271,8 +290,7 @@ const UserProfileContent = ({ toggleSidenav }) => {
                                         <TableRow>
                                             <TableCell colSpan={colSpan}>
                                                 <p className="mx-4 my-2">
-                                                    {rowData[0]} has ${rowData[3]} in his
-                                                    wallet
+                                                    {donations[dataIndex].descripcion}
                                                 </p>
                                             </TableCell>
                                         </TableRow>
@@ -281,37 +299,6 @@ const UserProfileContent = ({ toggleSidenav }) => {
                             }} />
                         </Card>
                     </Grid>
-
-                    {/* <Grid item lg={4} md={4} sm={12} xs={12}>
-                        <Card>
-                            {paymentList.map((method, index) => (
-                                <Fragment key={index}>
-                                    <div className="py-4 px-6 flex flex-wrap items-center justify-between">
-                                        <div className="flex flex-wrap items-center">
-                                            <div className="flex justify-center items-center bg-gray w-64 h-52 border-radius-4">
-                                                <img
-                                                    className="w-36 overflow-hidden"
-                                                    src={method.img}
-                                                    alt="master card"
-                                                />
-                                            </div>
-                                            <div className="ml-4">
-                                                <h5 className="mb-1 font-medium">
-                                                    {method.type}
-                                                </h5>
-                                                <span className="text-muted">
-                                                    {method.product}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {index !== paymentList.length - 1 && (
-                                        <Divider />
-                                    )}
-                                </Fragment>
-                            ))}
-                        </Card>
-                    </Grid> */}
                 </Grid>
                 <div className="py-2"></div>
             </div>
@@ -340,21 +327,21 @@ const projectSummery = [
 
 const columns = [
     {
-        name: 'name', // field name in the row object
+        name: 'nombre', // field name in the row object
         label: 'Name', // column title that will be shown in table
         options: {
             filter: true,
         },
     },
     {
-        name: 'unit',
-        label: 'Units',
+        name: 'fecha',
+        label: 'Fecha',
         options: {
             filter: true,
         },
     },
     {
-        name: 'weight',
+        name: 'cantidad',
         label: 'Weight',
         options: {
             filter: true,

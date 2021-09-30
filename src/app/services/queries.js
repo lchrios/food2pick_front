@@ -1,8 +1,8 @@
 import api from './api';
 
-const getDonationsByDonator = (uid) => {
+const getDonationsByDonator = (id) => {
     return new Promise((resolve, reject) => {
-        api.get('/users/:uid/donation')
+        api.get(`/users/${id}/donation`)
         .then( res => resolve(res.data))
         .catch(err => reject(err));
     })
@@ -10,7 +10,7 @@ const getDonationsByDonator = (uid) => {
 
 const getDonationById = (id) => {
     return new Promise((resolve, reject) => {
-        api.get('/donation/:id')
+        api.get(`/donation/${id}`)
         .then( res => resolve(res.data))
         .catch(err => reject(err));
     })
@@ -48,9 +48,9 @@ const getAllReceivers = () => {
     })
 }
 
-const getDonationsByReceiver = (receiver) => {
+const getDonationsByReceiver = (id) => {
     return new Promise((resolve, reject) => {
-        api.get('/receiver/:id')
+        api.get(`/receivers/${id}`)
         .then(res => resolve(res.data))
         .catch(err => reject(err));
     })

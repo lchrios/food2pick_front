@@ -12,14 +12,24 @@ import { getAllInvoice, deleteInvoice } from './InvoiceService'
 import { Link, useHistory } from 'react-router-dom'
 import { ConfirmationDialog } from 'app/components'
 import clsx from 'clsx'
+import useAuth from 'app/hooks/useAuth'
+import { getAllReceivers, getAllTransports, getDonationsByDonator } from 'app/services/queries'
+import Loading from 'app/components/Loading/Loading'
 
 const InvoiceList = () => {
     const [invoiceList, setInvoiceList] = useState([])
     const [invoice, setInvoice] = useState(null)
     const [open, setOpen] = useState(false)
     const [isAlive, setIsAlive] = useState(true)
-
+    const { user } = useAuth();
     const history = useHistory()
+
+    const [counter, setCounter] = useState(3)
+    const [loading, setLoading] = useState(true)
+    
+    const [donations, setDonations] = useState([]);
+    const [transports, setTransports] = useState([]);
+    const [receivers, setReceivers] = useState([]);
 
     useEffect(() => {
         getAllInvoice().then((res) => {
@@ -28,6 +38,34 @@ const InvoiceList = () => {
 
         return () => setIsAlive(false)
     }, [isAlive])
+
+    useEffect(() => {
+        getDonationsByDonator(user.id)
+        .then((donations) => {
+            console.log(donations.result)
+            setDonations(donations.result)
+            setCounter(cnt => cnt-1)
+        })
+
+        getAllTransports()
+        .then((transports) => {
+            console.log(transports.result)
+            setTransports(transports.result)
+            setCounter(cnt => cnt-1)
+        })
+
+        getAllReceivers()
+        .then((receivers) => {
+            console.log(receivers.result)
+            setReceivers(receivers.result)
+            setCounter(cnt => cnt-1)
+        })
+
+    }, [])
+
+    useEffect(() => {
+        if (counter === 0) setLoading(false)
+    }, [counter])
 
     const handeViewClick = (invoiceId) => {
         history.push(`/invoice/${invoiceId}`)
@@ -52,6 +90,8 @@ const InvoiceList = () => {
     }
 
     return (
+        <>{   loading ? <Loading /> : 
+
         <div className="m-sm-30">
             <Link to="/invoice/add">
                 <Button className="mb-4" variant="contained" color="primary">
@@ -63,48 +103,48 @@ const InvoiceList = () => {
                     <TableHead>
                         <TableRow>
                             <TableCell className="pl-sm-24">
-                                Order No.
+                                ID
                             </TableCell>
-                            <TableCell className="px-0">Bill From</TableCell>
-                            <TableCell className="px-0">Bill To</TableCell>
+                            <TableCell className="px-0">Receiver</TableCell>
+                            <TableCell className="px-0">Transportist</TableCell>
                             <TableCell className="px-0">Status</TableCell>
                             <TableCell className="px-0">Actions</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {invoiceList.map((invoice, index) => (
-                            <TableRow key={invoice.id}>
+                        {donations.map((invoice, index) => (
+                            <TableRow key={index}>
                                 <TableCell
                                     className="pl-sm-24 capitalize"
                                     align="left"
                                 >
-                                    {invoice.orderNo}
+                                    {invoice.donacion_id}
                                 </TableCell>
                                 <TableCell
                                     className="pl-0 capitalize"
                                     align="left"
                                 >
-                                    {invoice.seller.name}
+                                    {receivers[receivers.map(r => r.id).indexOf(invoice.receptor_id)]?.nombre}
                                 </TableCell>
                                 <TableCell
                                     className="pl-0 capitalize"
                                     align="left"
                                 >
-                                    {invoice.buyer.name}
+                                    {transports[transports.map(r => r.id).indexOf(invoice.transportista_id)]?.nombre}
                                 </TableCell>
                                 <TableCell className="pl-0 capitalize">
                                     <small
                                         className={clsx({
                                             'border-radius-4  text-white px-2 py-2px': true,
                                             'bg-primary':
-                                                invoice.status === 'delivered',
+                                                invoice.entregado === 1 ,
                                             'bg-secondary':
-                                                invoice.status === 'processing',
+                                                invoice.entregado !== 1 && invoice.entregado !== 0,
                                             'bg-error':
-                                                invoice.status === 'pending',
+                                                invoice.entregado === 0,
                                         })}
                                     >
-                                        {invoice.status}
+                                        {invoice.entregado === 1 ? 'delivered' : invoice.entregado === 0 ? 'pending' : 'processing'}
                                     </small>
                                 </TableCell>
                                 <TableCell className="pl-0">
@@ -112,19 +152,19 @@ const InvoiceList = () => {
                                         color="primary"
                                         className="mr-2"
                                         onClick={() =>
-                                            handeViewClick(invoice.id)
+                                            handeViewClick(invoice.donacion_id)
                                         }
                                     >
                                         Open
                                     </Button>
-                                    <Button
+                                    {/* <Button
                                         color="secondary"
                                         onClick={() =>
-                                            handeDeleteClick(invoice)
+                                            handeDeleteClick(index)
                                         }
                                     >
                                         Delete
-                                    </Button>
+                                    </Button> */}
                                 </TableCell>
                             </TableRow>
                         ))}
@@ -138,6 +178,7 @@ const InvoiceList = () => {
                 text="Are you sure to delete?"
             />
         </div>
+        }</>
     )
 }
 

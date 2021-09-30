@@ -16,6 +16,9 @@ import { getInvoiceById } from './InvoiceService'
 import { format } from 'date-fns'
 import { makeStyles } from '@material-ui/core/styles'
 import clsx from 'clsx'
+import useAuth from 'app/hooks/useAuth'
+import { getAllReceivers, getAllTransports, getDonationById, getDonationsByDonator } from 'app/services/queries'
+import Loading from 'app/components/Loading/Loading'
 
 const useStyles = makeStyles(({ palette, ...theme }) => ({
     '@global': {
@@ -44,9 +47,25 @@ const useStyles = makeStyles(({ palette, ...theme }) => ({
 
 const InvoiceViewer = ({ toggleInvoiceEditor }) => {
     const [state, setState] = useState({})
-
+    const { user } = useAuth();
     const { id } = useParams()
     const classes = useStyles()
+
+    const [donations, setDonations] = useState([]);
+    const [transports, setTransports] = useState([]);
+    const [receivers, setReceivers] = useState([]);
+    const [donationInd, setDonationInd] = useState(0);
+
+
+    const [matchDon, setMatchDon] = useState([]);
+
+    const [counter, setCounter] = useState(3)
+    const [loading, setLoading] = useState(true)
+
+
+    useEffect(() => {
+        if (counter === 0) setLoading(false)
+    }, [counter])
 
     useEffect(() => {
         if (id !== 'add')
@@ -54,6 +73,33 @@ const InvoiceViewer = ({ toggleInvoiceEditor }) => {
                 setState({ ...res.data })
             })
     }, [id])
+
+    useEffect(() => {
+        getDonationsByDonator(user.id)
+        .then((donations) => {
+            console.log(donations.result)
+            setDonations(donations.result)
+            setMatchDon(donations.result.filter(don => don.donacion_id == id))
+            console.log(donations.result.filter(don => don.donacion_id == id))
+            setDonationInd(donations.result.map(don => don.donacion_id).indexOf(parseInt(id)))
+            setCounter(cnt => cnt-1)
+        })
+
+        getAllTransports()
+        .then((transports) => {
+            console.log(transports.result)
+            setTransports(transports.result)
+            setCounter(cnt => cnt-1)
+        })
+
+        getAllReceivers()
+        .then((receivers) => {
+            console.log(receivers.result)
+            setReceivers(receivers.result)
+            setCounter(cnt => cnt-1)
+        })
+
+    }, [])
 
     const handlePrint = () => window.print()
 
@@ -64,12 +110,15 @@ const InvoiceViewer = ({ toggleInvoiceEditor }) => {
         seller,
         item: invoiceItemList = [],
         status,
-        vat,
         date,
     } = state
 
+    let vat = 10
+
     return (
-        <div className={clsx('invoice-viewer py-4', classes.invoiceViewer)}>
+        <>{ loading ? <Loading className="my-5" /> : 
+        
+            <div className={clsx('invoice-viewer py-4', classes.invoiceViewer)}>
             <div className="viewer_actions px-4 mb-5 flex items-center justify-between">
                 <Link to="/invoice/list">
                     <IconButton>
@@ -82,7 +131,7 @@ const InvoiceViewer = ({ toggleInvoiceEditor }) => {
                         variant="contained"
                         color="primary"
                         onClick={() => toggleInvoiceEditor()}
-                    >
+                        >
                         Edit Invoice
                     </Button>
                     <Button
@@ -90,7 +139,7 @@ const InvoiceViewer = ({ toggleInvoiceEditor }) => {
                         className="py-2"
                         variant="contained"
                         color="secondary"
-                    >
+                        >
                         Print Invoice
                     </Button>
                 </div>
@@ -101,22 +150,22 @@ const InvoiceViewer = ({ toggleInvoiceEditor }) => {
                     <div>
                         <h5 className="mb-2">Order Info</h5>
                         <p className="mb-4">Order Number</p>
-                        <p className="mb-0"># {orderNo}</p>
+                        <p className="mb-0"># {id}</p>
                     </div>
                     <div className="text-right">
                         <h5 className="font-normal mb-4 capitalize">
-                            <strong>Order status:</strong> {status}
+                            <strong>Order status:</strong> {matchDon[matchDon.lastIndex] && matchDon[matchDon.lastIndex].entregado !== undefined ? matchDon[matchDon.lastIndex] : 'Delivered'}
                         </h5>
                         <h5 className="font-normal capitalize">
-                            <strong>Order date: </strong>{' '}
-                            <span>
+                            <strong>Order date: </strong>{donations[donationInd].fecha}
+                            {/* <span>
                                 {date
                                     ? format(
-                                          new Date(date).getTime(),
-                                          'MMMM dd, yyyy'
-                                      )
-                                    : ''}
-                            </span>
+                                        new Date(date).getTime(),
+                                        'MMMM dd, yyyy'
+                                        )
+                                        : ''}
+                            </span> */}
                         </h5>
                     </div>
                 </div>
@@ -125,15 +174,15 @@ const InvoiceViewer = ({ toggleInvoiceEditor }) => {
 
                 <div className="viewer__billing-info px-4 py-5 flex justify-between">
                     <div>
-                        <h5 className="mb-2">Bill From</h5>
-                        <p className="mb-4">{seller ? seller.name : null}</p>
+                        <h5 className="mb-2">Transportist</h5>
+                        <p className="mb-4">{transports[transports.map(rec => rec.id).indexOf(parseInt(donations[donationInd].transportista_id))].nombre}</p>
                         <p className="mb-0 whitespace-pre-wrap">
                             {seller ? seller.address : null}
                         </p>
                     </div>
                     <div className="text-right w-full">
-                        <h5 className="mb-2">Bill To</h5>
-                        <p className="mb-4">{buyer ? buyer.name : null}</p>
+                        <h5 className="mb-2">Receiver</h5>
+                        <p className="mb-4">{receivers[receivers.map(rec => rec.id).indexOf(parseInt(donations[donationInd].receptor_id))].nombre}</p>
                         <p className="mb-0 whitespace-pre-wrap">
                             {buyer ? buyer.address : null}
                         </p>
@@ -157,30 +206,30 @@ const InvoiceViewer = ({ toggleInvoiceEditor }) => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {invoiceItemList.map((item, index) => {
-                                subTotalCost += parseFloat(item.weight);
+                            {matchDon.map((item, index) => {
+                                subTotalCost += parseInt(item.cantidad);
                                 return (
                                     <TableRow key={index}>
                                         <TableCell
                                             className="pl-sm-24 capitalize"
                                             align="left"
-                                        >
+                                            >
                                             {index + 1}
                                         </TableCell>
                                         <TableCell
                                             className="pl-0 capitalize"
                                             align="left"
-                                        >
-                                            {item.name}
+                                            >
+                                            {item.nombre}
                                         </TableCell>
                                         <TableCell className="pl-0 capitalize">
-                                            {item.unit}
+                                            {item.cantidad}
                                         </TableCell>
                                         <TableCell
                                             className="pl-0 capitalize"
                                             align="left"
-                                        >
-                                            {item.weight} kg
+                                            >
+                                            {item.descripcion}
                                         </TableCell>
                                         {/* <TableCell className="pl-0">
                                             {item.unit * item.price}
@@ -217,6 +266,7 @@ const InvoiceViewer = ({ toggleInvoiceEditor }) => {
                 </div>
             </div>
         </div>
+}</>
     )
 }
 
