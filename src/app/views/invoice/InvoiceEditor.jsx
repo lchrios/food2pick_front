@@ -26,6 +26,7 @@ import { useParams, useHistory } from 'react-router-dom'
 import { makeStyles } from '@material-ui/core/styles'
 import clsx from 'clsx'
 import { useCallback } from 'react'
+import { uploadDonation } from 'app/services/queries'
 
 const useStyles = makeStyles(({ palette, ...theme }) => ({
     invoiceEditor: {
@@ -37,7 +38,13 @@ const useStyles = makeStyles(({ palette, ...theme }) => ({
 
 const InvoiceEditor = ({ isNewInvoice, toggleInvoiceEditor }) => {
     const [isAlive, setIsAlive] = useState(true)
-    const [state, setState] = useState(initialValues)
+    const [state, setState] = useState({
+        "id": id,
+        "fecha": new Date().toISOString(),
+        "nombre": "Arroz",
+        "cantidad": 50,
+        "descripcion": "Bolsa kileada de arroz"
+    })
 
     const history = useHistory()
     const { id } = useParams()
@@ -102,25 +109,42 @@ const InvoiceEditor = ({ isNewInvoice, toggleInvoiceEditor }) => {
     }
 
     const handleDateChange = (date) => {
-        setState({ ...state, date })
+        setState({ 
+            ...state, 
+            "fecha": date 
+        })
     }
 
     const handleSubmit = () => {
         setState({ ...state, loading: true })
         let tempState = { ...state }
-        delete tempState.loading
-        if (isNewInvoice)
-            addInvoice(tempState).then(() => {
-                setState({ ...state, loading: false })
-                history.push(`/invoice/${state.id}`)
-                toggleInvoiceEditor()
-            })
-        else
-            updateInvoice(tempState).then(() => {
-                setState({ ...state, loading: false })
-                toggleInvoiceEditor()
-            })
-        console.log(state)
+        // delete tempState.loading
+        // delete tempState.buyer
+        // delete tempState.currency
+        // delete tempState.date
+        // delete tempState.item
+        // delete tempState.orderNo;
+        // delete tempState.status;
+        // delete tempState.seller;
+
+        tempState.fecha = new Date().toISOString();   
+        console.log(tempState)
+
+        uploadDonation(tempState).then((invoice) =>{
+            console.log(invoice)
+            
+        })
+        // if (isNewInvoice)
+        //     // addInvoice(tempState).then(() => {
+        //     //     setState({ ...state, loading: false })
+        //     //     history.push(`/invoice/${state.id}`)
+        //     //     toggleInvoiceEditor()
+        //     // })
+        // else
+        //     updateInvoice(tempState).then(() => {
+        //         setState({ ...state, loading: false })
+        //         toggleInvoiceEditor()
+        //     })
     }
 
     useEffect(() => {
@@ -139,14 +163,13 @@ const InvoiceEditor = ({ isNewInvoice, toggleInvoiceEditor }) => {
 
     let subTotalCost = 0
     let {
-        orderNo,
-        buyer,
-        seller,
-        item: invoiceItemList = [],
-        status,
-        vat,
-        date,
-        currency,
+        transportista_id,
+        receptor_id,
+        entregado,
+        fecha,
+        nombre,
+        descripcion,
+        cantidad,
         loading,
     } = state
 
@@ -169,6 +192,9 @@ const InvoiceEditor = ({ isNewInvoice, toggleInvoiceEditor }) => {
                             variant="contained"
                             color="primary"
                             disabled={loading}
+                            onClick={() => {
+                                handleSubmit()
+                            }}
                         >
                             Save
                         </Button>
@@ -183,8 +209,8 @@ const InvoiceEditor = ({ isNewInvoice, toggleInvoiceEditor }) => {
                             label="Order No."
                             type="text"
                             fullWidth
-                            name="orderNo"
-                            value={orderNo}
+                            name="id"
+                            value={id}
                             onChange={handleChange}
                             validators={['required']}
                             errorMessages={['this field is required']}
@@ -197,27 +223,27 @@ const InvoiceEditor = ({ isNewInvoice, toggleInvoiceEditor }) => {
                         >
                             <RadioGroup
                                 aria-label="status"
-                                name="status"
-                                value={status}
+                                name="entregado"
+                                value={state ? state.entregado : 0 }
                                 onChange={handleChange}
                             >
                                 <FormControlLabel
                                     className="h-32"
-                                    value="pending"
+                                    value={0}
                                     control={<Radio color="secondary" />}
                                     label="Pending"
                                     labelPlacement="start"
                                 />
                                 <FormControlLabel
                                     className="h-32"
-                                    value="processing"
+                                    value={-1}
                                     control={<Radio color="secondary" />}
                                     label="Processing"
                                     labelPlacement="start"
                                 />
                                 <FormControlLabel
                                     className="h-32"
-                                    value="delivered"
+                                    value={1}
                                     control={<Radio color="secondary" />}
                                     label="Delivered"
                                     labelPlacement="start"
@@ -239,7 +265,7 @@ const InvoiceEditor = ({ isNewInvoice, toggleInvoiceEditor }) => {
                                 inputVariant="standard"
                                 type="text"
                                 autoOk={true}
-                                value={date}
+                                value={fecha}
                                 fullWidth
                                 format="MMMM dd, yyyy"
                                 onChange={handleDateChange}
@@ -261,31 +287,31 @@ const InvoiceEditor = ({ isNewInvoice, toggleInvoiceEditor }) => {
                 >
                     <Grid item>
                         <div>
-                            <h5 className="mb-5 ">Bill From</h5>
+                            <h5 className="mb-5 ">Transportist</h5>
                             <TextValidator
                                 className="mb-5"
-                                label="Seller Name"
+                                label="Transportman name"
                                 onChange={(event) =>
                                     handleSellerBuyerChange(event, 'seller')
                                 }
                                 type="text"
                                 name="name"
                                 fullWidth
-                                value={seller ? seller.name : null}
+                                value={"Transportista 1"}
                                 validators={['required']}
                                 errorMessages={['this field is required']}
                             />
                             <TextValidator
-                                label="Seller Name"
+                                label="Transports id"
                                 type="text"
                                 onChange={(event) =>
                                     handleSellerBuyerChange(event, 'seller')
                                 }
-                                name="address"
+                                name="transportista_id_address"
                                 fullWidth
                                 multiline={true}
                                 rowsMax={4}
-                                value={seller ? seller.address : null}
+                                value={"1"}
                                 validators={['required']}
                                 errorMessages={['this field is required']}
                             />
@@ -296,19 +322,19 @@ const InvoiceEditor = ({ isNewInvoice, toggleInvoiceEditor }) => {
                             <h5 className="mb-5">Bill To</h5>
                             <TextValidator
                                 className="mb-5"
-                                label="Buyer Name"
+                                label="Receiver"
                                 onChange={(event) =>
                                     handleSellerBuyerChange(event, 'buyer')
                                 }
                                 type="text"
                                 name="name"
                                 fullWidth
-                                value={buyer ? buyer.name : null}
+                                value={"Receiver Name"}
                                 validators={['required']}
                                 errorMessages={['this field is required']}
                             />
                             <TextValidator
-                                label="Buyer Address"
+                                label="Receiver ID"
                                 onChange={(event) =>
                                     handleSellerBuyerChange(event, 'buyer')
                                 }
@@ -317,7 +343,7 @@ const InvoiceEditor = ({ isNewInvoice, toggleInvoiceEditor }) => {
                                 fullWidth
                                 multiline={true}
                                 rowsMax={4}
-                                value={buyer ? buyer.address : null}
+                                value={"1"}
                                 validators={['required']}
                                 errorMessages={['this field is required']}
                             />
@@ -332,110 +358,93 @@ const InvoiceEditor = ({ isNewInvoice, toggleInvoiceEditor }) => {
                             <TableCell className="pl-sm-24">#</TableCell>
                             <TableCell className="px-0">Item Name</TableCell>
                             <TableCell className="px-0">Unit</TableCell>
-                            <TableCell className="px-0">Weight</TableCell>
+                            <TableCell className="px-0">Description</TableCell>
                         </TableRow>
                     </TableHead>
 
                     <TableBody>
-                        {invoiceItemList.map((item, index) => {
-                            subTotalCost += parseFloat(item.weight)
-                            return (
-                                <TableRow key={index}>
-                                    <TableCell
-                                        className="pl-sm-24 capitalize"
-                                        align="left"
-                                    >
-                                        {index + 1}
-                                    </TableCell>
+                    <TableRow key={1}>
+                            <TableCell
+                                className="pl-sm-24 capitalize"
+                                align="left"
+                            >
+                                {1}
+                            </TableCell>
 
-                                    <TableCell
-                                        className="pl-0 capitalize"
-                                        align="left"
-                                    >
-                                        <TextValidator
-                                            label="Item Name"
-                                            onChange={(event) =>
-                                                handleIvoiceListChange(
-                                                    event,
-                                                    index
-                                                )
-                                            }
-                                            type="text"
-                                            name="name"
-                                            fullWidth
-                                            value={item ? item.name : null}
-                                            validators={['required']}
-                                            errorMessages={[
-                                                'this field is required',
-                                            ]}
-                                        />
-                                    </TableCell>
+                            <TableCell
+                                className="pl-0 capitalize"
+                                align="left"
+                            >
+                                <TextValidator
+                                    label="Item Name"
+                                    onChange={(event) =>
+                                        handleIvoiceListChange(
+                                            event,
+                                            1
+                                        )
+                                    }
+                                    type="text"
+                                    name="npmbre"
+                                    fullWidth
+                                    value={nombre}
+                                    validators={['required']}
+                                    errorMessages={[
+                                        'this field is required',
+                                    ]}
+                                />
+                            </TableCell>
 
-                                    <TableCell
-                                        className="pl-0 capitalize"
-                                        align="left"
-                                    >
-                                        <TextValidator
-                                            label="Item units"
-                                            onChange={(event) =>
-                                                handleIvoiceListChange(
-                                                    event,
-                                                    index
-                                                )
-                                            }
-                                            type="number"
-                                            name="unit"
-                                            fullWidth
-                                            value={item ? item.unit : null}
-                                            validators={['required']}
-                                            errorMessages={[
-                                                'this field is required',
-                                            ]}
-                                        />
-                                    </TableCell>
+                            <TableCell
+                                className="pl-0 capitalize"
+                                align="left"
+                            >
+                                <TextValidator
+                                    label="Quantity"
+                                    onChange={(event) =>
+                                        handleIvoiceListChange(
+                                            event,
+                                            1
+                                        )
+                                    }
+                                    type="number"
+                                    name="cantidad"
+                                    fullWidth
+                                    value={cantidad}
+                                    validators={['required']}
+                                    errorMessages={[
+                                        'this field is required',
+                                    ]}
+                                />
+                            </TableCell>
 
-                                    <TableCell
-                                        className="pl-0 capitalize"
-                                        align="left"
-                                    >
-                                        <TextValidator
-                                            label="Total weight"
-                                            onChange={(event) =>
-                                                handleIvoiceListChange(
-                                                    event,
-                                                    index
-                                                )
-                                            }
-                                            type="number"
-                                            name="weight"
-                                            fullWidth
-                                            value={item ? item.weight : null}
-                                            validators={['required']}
-                                            errorMessages={[
-                                                'this field is required',
-                                            ]}
-                                        />
-                                    </TableCell>
-                                    <TableCell
-                                        className="pl-0 capitalize"
-                                        align="left"
-                                    >
-                                        <Button
-                                            onClick={() =>
-                                                deleteItemFromInvoiceList(index)
-                                            }
-                                        >
-                                            <Icon className="text-secondary">delete</Icon>
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
-                            )
-                        })}
+                            <TableCell
+                                className="pl-0 capitalize"
+                                align="left"
+                            >
+                                <TextValidator
+                                    label="Descripcion"
+                                    onChange={(event) =>
+                                        handleIvoiceListChange(
+                                            event,
+                                            1
+                                        )
+                                    }
+                                    type="text"
+                                    name="descripcion"
+                                    fullWidth
+                                    value={descripcion}
+                                    validators={['required']}
+                                    errorMessages={[
+                                        'this field is required',
+                                    ]}
+                                />
+                            </TableCell>
+                        </TableRow>
                     </TableBody>
                 </Table>
-                <div className="flex justify-end px-4 mb-4">
+                {/* <div className="flex justify-end px-4 mb-4">
                     <Button onClick={addItemToInvoiceList} color="primary"><Icon className="mr-2">add_box</Icon>Add Item</Button>
-                </div>
+                </div> */}
 
                 {/* total cost calculation */}
                 <div className="px-4 flex justify-end">
@@ -443,7 +452,6 @@ const InvoiceEditor = ({ isNewInvoice, toggleInvoiceEditor }) => {
                         <div className="pr-12">
                             <p className="mb-8">Sub Total:</p>
                             <p className="mb-12">Vat(%):</p>
-                            <p className="mb-5">currency:</p>
                             <strong>
                                 <p>Grand Total:</p>
                             </strong>
@@ -453,27 +461,15 @@ const InvoiceEditor = ({ isNewInvoice, toggleInvoiceEditor }) => {
                             <TextValidator
                                 className="mb-1"
                                 label="Vat"
-                                onChange={handleChange}
                                 type="number"
                                 name="vat"
-                                value={vat}
+                                value={10}
                                 validators={['required']}
                                 errorMessages={['this field is required']}
                             />
-                            <br />
-                            <TextValidator
-                                label="Currency"
-                                onChange={handleChange}
-                                type="text"
-                                name="currency"
-                                value={currency}
-                                validators={['required']}
-                                errorMessages={['this field is required']}
-                            />
-                            <p className="mt-2">
+                            <p className="mt-8">
                                 <strong>
-                                    {currency}
-                                    {(subTotalCost * vat) / 100}
+                                    {(cantidad * 10) / 100}
                                 </strong>
                             </p>
                         </div>
@@ -485,23 +481,6 @@ const InvoiceEditor = ({ isNewInvoice, toggleInvoiceEditor }) => {
     )
 }
 
-const initialValues = {
-    id: '',
-    orderNo: '',
-    buyer: {
-        name: '',
-        address: '',
-    },
-    seller: {
-        name: '',
-        address: '',
-    },
-    item: [],
-    status: '',
-    vat: '',
-    date: new Date(),
-    currency: '',
-    loading: false,
-}
+
 
 export default InvoiceEditor
