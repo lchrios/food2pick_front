@@ -12,6 +12,7 @@ import {
     TableRow,
     TableCell,
     TableBody,
+    Icon,
     Card,
 } from '@material-ui/core'
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator'
@@ -119,6 +120,7 @@ const InvoiceEditor = ({ isNewInvoice, toggleInvoiceEditor }) => {
                 setState({ ...state, loading: false })
                 toggleInvoiceEditor()
             })
+        console.log(state)
     }
 
     useEffect(() => {
@@ -329,16 +331,14 @@ const InvoiceEditor = ({ isNewInvoice, toggleInvoiceEditor }) => {
                         <TableRow className="bg-default">
                             <TableCell className="pl-sm-24">#</TableCell>
                             <TableCell className="px-0">Item Name</TableCell>
-                            <TableCell className="px-0">Unit Price</TableCell>
                             <TableCell className="px-0">Unit</TableCell>
-                            <TableCell className="px-0">Cost</TableCell>
-                            <TableCell className="px-0">Action</TableCell>
+                            <TableCell className="px-0">Weight</TableCell>
                         </TableRow>
                     </TableHead>
 
                     <TableBody>
                         {invoiceItemList.map((item, index) => {
-                            subTotalCost += item.price * item.unit
+                            subTotalCost += parseFloat(item.weight)
                             return (
                                 <TableRow key={index}>
                                     <TableCell
@@ -376,30 +376,7 @@ const InvoiceEditor = ({ isNewInvoice, toggleInvoiceEditor }) => {
                                         align="left"
                                     >
                                         <TextValidator
-                                            label="Item Price"
-                                            onChange={(event) =>
-                                                handleIvoiceListChange(
-                                                    event,
-                                                    index
-                                                )
-                                            }
-                                            type="number"
-                                            name="price"
-                                            fullWidth
-                                            value={item ? item.price : null}
-                                            validators={['required']}
-                                            errorMessages={[
-                                                'this field is required',
-                                            ]}
-                                        />
-                                    </TableCell>
-
-                                    <TableCell
-                                        className="pl-0 capitalize"
-                                        align="left"
-                                    >
-                                        <TextValidator
-                                            label="Item Unit"
+                                            label="Item units"
                                             onChange={(event) =>
                                                 handleIvoiceListChange(
                                                     event,
@@ -421,9 +398,24 @@ const InvoiceEditor = ({ isNewInvoice, toggleInvoiceEditor }) => {
                                         className="pl-0 capitalize"
                                         align="left"
                                     >
-                                        {item.unit * item.price}
+                                        <TextValidator
+                                            label="Total weight"
+                                            onChange={(event) =>
+                                                handleIvoiceListChange(
+                                                    event,
+                                                    index
+                                                )
+                                            }
+                                            type="number"
+                                            name="weight"
+                                            fullWidth
+                                            value={item ? item.weight : null}
+                                            validators={['required']}
+                                            errorMessages={[
+                                                'this field is required',
+                                            ]}
+                                        />
                                     </TableCell>
-
                                     <TableCell
                                         className="pl-0 capitalize"
                                         align="left"
@@ -433,7 +425,7 @@ const InvoiceEditor = ({ isNewInvoice, toggleInvoiceEditor }) => {
                                                 deleteItemFromInvoiceList(index)
                                             }
                                         >
-                                            Delete
+                                            <Icon className="text-secondary">delete</Icon>
                                         </Button>
                                     </TableCell>
                                 </TableRow>
@@ -442,7 +434,7 @@ const InvoiceEditor = ({ isNewInvoice, toggleInvoiceEditor }) => {
                     </TableBody>
                 </Table>
                 <div className="flex justify-end px-4 mb-4">
-                    <Button onClick={addItemToInvoiceList}>Add Item</Button>
+                    <Button onClick={addItemToInvoiceList} color="primary"><Icon className="mr-2">add_box</Icon>Add Item</Button>
                 </div>
 
                 {/* total cost calculation */}
@@ -457,9 +449,9 @@ const InvoiceEditor = ({ isNewInvoice, toggleInvoiceEditor }) => {
                             </strong>
                         </div>
                         <div>
-                            <p className="mb-4">{subTotalCost}</p>
+                            <p className="mb-4">{subTotalCost} Kg</p>
                             <TextValidator
-                                className="mb-4"
+                                className="mb-1"
                                 label="Vat"
                                 onChange={handleChange}
                                 type="number"
@@ -478,10 +470,10 @@ const InvoiceEditor = ({ isNewInvoice, toggleInvoiceEditor }) => {
                                 validators={['required']}
                                 errorMessages={['this field is required']}
                             />
-                            <p className="mt-4">
+                            <p className="mt-2">
                                 <strong>
                                     {currency}
-                                    {subTotalCost + (subTotalCost * vat) / 100}
+                                    {(subTotalCost * vat) / 100}
                                 </strong>
                             </p>
                         </div>

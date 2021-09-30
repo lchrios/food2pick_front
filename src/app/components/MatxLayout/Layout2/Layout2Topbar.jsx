@@ -64,7 +64,7 @@ const Layout2Topbar = () => {
                 <div className="flex items-center h-full">
                     <img
                         className="h-32"
-                        src="/assets/images/logo.svg"
+                        src="/assets/images/Food2Pick.svg"
                         alt="company-logo"
                     />
                     <span
@@ -73,7 +73,7 @@ const Layout2Topbar = () => {
                             classes.brandText
                         )}
                     >
-                        Matx
+                        Let your food be delivered!
                     </span>
                 </div>
                 <div className="mx-auto"></div>
@@ -82,7 +82,7 @@ const Layout2Topbar = () => {
                         <MatxSearchBox />
                         <NotificationBar2 />
 
-                        <ShoppingCart />
+                        {/* <ShoppingCart /> */}
 
                         <MatxMenu
                             menuButton={
@@ -93,13 +93,18 @@ const Layout2Topbar = () => {
                             }
                         >
                             <MenuItem className={classes.menuItem}>
-                                <Icon> home </Icon>
-                                <span className="pl-4"> Home </span>
+                                <Link 
+                                    className={classes.menuItem}
+                                    to='/home'
+                                >
+                                    <Icon> home </Icon>
+                                    <span className="pl-4"> Home </span>
+                                </Link>
                             </MenuItem>
                             <MenuItem>
                                 <Link
                                     className={classes.menuItem}
-                                    to="/page-layouts/user-profile"
+                                    to="/home"
                                 >
                                     <Icon> person </Icon>
                                     <span className="pl-4"> Profile </span>

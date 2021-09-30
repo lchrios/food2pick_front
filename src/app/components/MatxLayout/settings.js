@@ -5,8 +5,8 @@ import { themes } from '../MatxTheme/initThemes'
 // UPDATE BELOW CODE
 // DOC http://demos.ui-lib.com/matx-react-doc/layout.html
 export const MatxLayoutSettings = {
-    activeLayout: 'layout1', // layout1, layout2
-    activeTheme: 'purpleDark1', // View all valid theme colors inside MatxTheme/themeColors.js
+    activeLayout: 'layout2', // layout1, layout2
+    activeTheme: 'purple1', // View all valid theme colors inside MatxTheme/themeColors.js
     perfectScrollbar: true,
 
     themes: themes,
@@ -16,12 +16,12 @@ export const MatxLayoutSettings = {
     secondarySidebar: {
         show: false,
         open: false,
-        theme: 'purpleDark2', // View all valid theme colors inside MatxTheme/themeColors.js
+        theme: 'red', // View all valid theme colors inside MatxTheme/themeColors.js
     },
     // Footer options
     footer: {
         show: true,
         fixed: false,
-        theme: 'purpleDark2', // View all valid theme colors inside MatxTheme/themeColors.js
+        theme: 'slateDark1', // View all valid theme colors inside MatxTheme/themeColors.js
     },
 }

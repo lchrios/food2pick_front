@@ -18,7 +18,7 @@ const usestyles = makeStyles(({ palette, ...theme }) => ({
 const UserProfileSidenav = () => {
     const classes = usestyles()
     const { user } = useAuth()
-    console.log(user)
+    
     return (
         <div className={clsx('flex-column items-center', classes.sidenav)}>
             <Avatar

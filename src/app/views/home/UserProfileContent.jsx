@@ -6,13 +6,18 @@ import {
     Grid,
     Icon,
     IconButton,
+    TableCell,
+    TableRow,
 } from '@material-ui/core'
-import React, { Fragment, useEffect } from 'react'
+import React, { Fragment, useEffect, useState } from 'react'
 import ProfileBarChart from './ProfileBarChart'
 import { makeStyles, useTheme } from '@material-ui/core/styles'
 import clsx from 'clsx'
 import useAuth from 'app/hooks/useAuth'
-import { getDonations } from 'app/services/queries';
+import { getDonationsByDonator } from 'app/services/queries';
+import MUIDataTable from 'mui-datatables'
+import axios from 'axios'
+
 
 const usestyles = makeStyles(({ palette, ...theme }) => ({
     profileContent: {
@@ -66,12 +71,49 @@ const usestyles = makeStyles(({ palette, ...theme }) => ({
 
 const UserProfileContent = ({ toggleSidenav }) => {
     const classes = usestyles()
-    const theme = useTheme()
+    const theme = useTheme();
+    const [donations, setDonations] = useState([]);
+    const [summary, setSummary] = useState({
+        "donations": {
+            title: 'Donations made',
+            amount: 0,
+            icon: 'shopping_basket',
+        },
+        "food": {
+            title: 'KG of food',
+            amount: "0 Kg",
+            icon: 'local_dining'
+        },
+        "last": {
+            title: 'Last donation',
+            amount: new Date(new Date().getTime() - 1*17*60*60*1000).toLocaleTimeString("es-MX", options),
+            icon: 'access_time'
+        }
+    });
     let { user } = useAuth();
 
+    const [isAlive, setIsAlive] = useState(true)
+    
+
     useEffect(() => {
-        getDonations(user.uid)
+        getDonationsByDonator(user.id)
+        .then(donations => {
+            console.log(donations.result)
+            //setDonations(donations)
+        })
     }, [])
+
+    useEffect(() => {
+        if (donations.length > 0) {
+            // * sort them by time
+            donations.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+
+            // * calculate summaries
+            donations.forEach((donation) => {
+
+            })
+        }
+    }, donations)
 
     return (
         <Fragment>
@@ -83,26 +125,26 @@ const UserProfileContent = ({ toggleSidenav }) => {
                 </div>
                 <div className={classes.headerCardHolder}>
                     <Grid container spacing={3}>
-                        {projectSummery.map((project) => (
+                        {Object.keys(summary).map((key) => (
                             <Grid
                                 item
                                 lg={4}
                                 md={4}
                                 sm={12}
                                 xs={12}
-                                key={project.title}
+                                key={summary[key].title}
                             >
                                 <Card className="h-96 bg-gray bg-default flex items-center justify-between p-4">
                                     <div>
                                         <span className="text-light-white uppercase">
-                                            {project.title}
+                                            {summary[key].title}
                                         </span>
                                         <h4 className="font-normal text-white m-0 pt-2">
-                                            {project.amount}
+                                            {summary[key].amount}
                                         </h4>
                                     </div>
                                     <div className="w-56 h-36">
-                                        <Icon className={classes.largeIcon}>{project.icon}</Icon>
+                                        <Icon className={classes.largeIcon}>{summary[key].icon}</Icon>
                                     </div>
                                 </Card>
                             </Grid>
@@ -130,13 +172,13 @@ const UserProfileContent = ({ toggleSidenav }) => {
                                     </span>
                                 </div>
                                 <div>
-                                    <h1 className="font-normal m-0 mb-1">12</h1>
+                                    <h1 className="font-normal m-0 mb-1">12.3 Kg</h1>
                                     <span className="font-normal text-muted uppercase">
                                         avg monthly
                                     </span>
                                 </div>
                                 <div>
-                                    <h1 className="font-normal m-0 mb-1">3</h1>
+                                    <h1 className="font-normal m-0 mb-1">3.1 Kg</h1>
                                     <span className="font-normal text-muted uppercase">
                                         avg weekly
                                     </span>
@@ -210,107 +252,33 @@ const UserProfileContent = ({ toggleSidenav }) => {
                     <Grid item lg={8} md={8} sm={12} xs={12}>
                         <div className="py-3"></div>
                         <Card className="overflow-unset flex py-4">
-                            <div className="w-100 min-w-100 text-center">
-                                <Fab
-                                    className="relative mt--14"
-                                    size="medium"
-                                    color="primary"
-                                >
-                                    <Icon>trending_up</Icon>
-                                </Fab>
-                                <div className="py-3"></div>
-                                <IconButton size="small">
-                                    <Icon>favorite</Icon>
-                                </IconButton>
-                                <p className="pb-4 m-0">65</p>
-
-                                <IconButton size="small">
-                                    <Icon>chat</Icon>
-                                </IconButton>
-                                <p className="m-0">65</p>
-                            </div>
-                            <div className="flex-grow">
-                                <div className="flex items-center justify-between pr-4 pb-3">
-                                    <h5 className="m-0 font-medium capitalize">
-                                        update profile picture
-                                    </h5>
-                                    <span className="text-muted">
-                                        12/03/2019
-                                    </span>
-                                </div>
-                                <Divider className="mb-4"></Divider>
-                                <div className={classes.cardGrayBox}>
-                                    <img
-                                        className="h-full w-full border-radius-4"
-                                        src="/assets/images/photo-1.jpg"
-                                        alt="random"
-                                    />
-                                </div>
-                            </div>
-                        </Card>
-                        <div className="py-7"></div>
-                        <Card className="overflow-unset flex py-4">
-                            <div className="w-100 min-w-100 text-center">
-                                <Fab
-                                    className={clsx(
-                                        'relative mt--14',
-                                        classes.cardLeftVerticalLine
-                                    )}
-                                    size="medium"
-                                    color="primary"
-                                >
-                                    <Icon>star_outline</Icon>
-                                </Fab>
-                            </div>
-                            <div className="flex-grow">
-                                <div className="flex items-center justify-between pr-4 pb-3">
-                                    <h5 className="m-0 font-medium capitalize">
-                                        bought air ticket
-                                    </h5>
-                                    <span className="text-muted">
-                                        12/03/2019
-                                    </span>
-                                </div>
-                                <Divider></Divider>
-                                <p className="m-0 pt-3">
-                                    Lorem Ipsum is simply dummy text of the
-                                    printing and typesetting industry. Lorem
-                                    Ipsum has been the industry's standard dummy
-                                    text ever since the 1500s
-                                </p>
-                            </div>
-                        </Card>
-                        <div className="py-7"></div>
-                        <Card className="overflow-unset flex py-4">
-                            <div className="w-100 min-w-100 text-center">
-                                <Fab
-                                    className={clsx(
-                                        'relative mt--14',
-                                        classes.cardLeftVerticalLine
-                                    )}
-                                    size="medium"
-                                    color="primary"
-                                >
-                                    <Icon>date_range</Icon>
-                                </Fab>
-                            </div>
-                            <div className="flex-grow">
-                                <div className="flex items-center justify-between pr-4 pb-3">
-                                    <h5 className="m-0 font-medium capitalize">
-                                        timeline box title
-                                    </h5>
-                                    <span className="text-muted">
-                                        12/03/2019
-                                    </span>
-                                </div>
-                                <Divider></Divider>
-                                <p className="m-0 pt-3">
-                                    Lorem Ipsum is simply dummy text of the
-                                    printing and typesetting industry. Lorem
-                                    Ipsum has been the industry's standard dummy
-                                    text ever since the 1500s
-                                </p>
-                            </div>
+                        <MUIDataTable
+                            title={'User Report'}
+                            data={donations}
+                            columns={columns}
+                            options={{
+                                filter: true,
+                                filterType: 'textField',
+                                responsive: 'simple',
+                                expandableRowsHeader: false,
+                                expandableRows: true, // set rows expandable
+                                expandableRowsOnClick: true,
+                                selectableRows: false,
+                                renderExpandableRow: (rowData, { dataIndex }) => {
+                                    const colSpan = rowData.length + 1
+                                    console.log(rowData)
+                                    return (
+                                        <TableRow>
+                                            <TableCell colSpan={colSpan}>
+                                                <p className="mx-4 my-2">
+                                                    {rowData[0]} has ${rowData[3]} in his
+                                                    wallet
+                                                </p>
+                                            </TableCell>
+                                        </TableRow>
+                                    )
+                                },
+                            }} />
                         </Card>
                     </Grid>
 
@@ -370,36 +338,27 @@ const projectSummery = [
     },
 ]
 
-const paymentList = [
+const columns = [
     {
-        img: '/assets/images/payment-methods/master-card.png',
-        type: 'Master Card',
-        product: 'Bundled product',
-        amount: 909,
+        name: 'name', // field name in the row object
+        label: 'Name', // column title that will be shown in table
+        options: {
+            filter: true,
+        },
     },
     {
-        img: '/assets/images/payment-methods/paypal.png',
-        type: 'Master Card',
-        product: 'Bundled product',
-        amount: 303,
+        name: 'unit',
+        label: 'Units',
+        options: {
+            filter: true,
+        },
     },
     {
-        img: '/assets/images/payment-methods/visa.png',
-        type: 'Paypal',
-        product: 'Bundled product',
-        amount: 330,
-    },
-    {
-        img: '/assets/images/payment-methods/maestro.png',
-        type: 'Paypal',
-        product: 'Bundled product',
-        amount: 909,
-    },
-    {
-        img: '/assets/images/payment-methods/maestro.png',
-        type: 'Master Card',
-        product: 'Bundled product',
-        amount: 909,
+        name: 'weight',
+        label: 'Weight',
+        options: {
+            filter: true,
+        },
     },
 ]
 

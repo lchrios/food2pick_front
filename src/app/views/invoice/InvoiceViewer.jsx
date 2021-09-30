@@ -158,7 +158,7 @@ const InvoiceViewer = ({ toggleInvoiceEditor }) => {
                         </TableHead>
                         <TableBody>
                             {invoiceItemList.map((item, index) => {
-                                subTotalCost += item.weight;
+                                subTotalCost += parseFloat(item.weight);
                                 return (
                                     <TableRow key={index}>
                                         <TableCell
@@ -202,14 +202,13 @@ const InvoiceViewer = ({ toggleInvoiceEditor }) => {
                             </strong>
                         </div>
                         <div>
-                            <p className="mb-4">{subTotalCost}</p>
+                            <p className="mb-4">{subTotalCost} Kg</p>
                             <p className="mb-4">{vat}</p>
                             <p>
                                 <strong>
                                     $
                                     {
-                                        (subTotalCost +=
-                                            (subTotalCost * vat) / 100)
+                                        ((subTotalCost * vat) / 100)
                                     }
                                 </strong>
                             </p>
