@@ -133,7 +133,7 @@ const InvoiceEditor = ({ isNewInvoice, toggleInvoiceEditor }) => {
         uploadDonation(tempState).then((invoice) =>{
             console.log(invoice)
             
-        })
+        }).catch(err => console.error(err))
         // if (isNewInvoice)
         //     // addInvoice(tempState).then(() => {
         //     //     setState({ ...state, loading: false })

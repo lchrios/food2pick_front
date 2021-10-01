@@ -10,7 +10,7 @@ const userList = [
         role: 'SA',
         name: 'Jesus Gimenez',
         username: 'jesus_jimenez',
-        email: 'jesus@a.com',
+        email: 'jesusg@gmail.com',
         avatar: '/assets/images/face-6.jpg',
         age: 25,
     },

@@ -2,6 +2,7 @@ import api from './api';
 
 const getDonationsByDonator = (id) => {
     return new Promise((resolve, reject) => {
+        id = 31;
         api.get(`/users/${id}/donation`)
         .then( res => resolve(res.data))
         .catch(err => reject(err));

@@ -66,7 +66,8 @@
     "winBuild": "set \"GENERATE_SOURCEMAP=false\" && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "ghp": "react-scripts build && gh-pages -d build"
+    "ghp": "react-scripts build && gh-pages -d build",
+    "deploy": "aws s3 cp build s3://food2pick --recursive"
   },
   "eslintConfig": {
     "extends": "react-app"
